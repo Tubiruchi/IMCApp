@@ -9,19 +9,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,6 +36,8 @@ import java.util.Locale
 fun BmiScreen() {
     var heightCm by rememberSaveable { mutableFloatStateOf(170f) }
     var weightKg by rememberSaveable { mutableFloatStateOf(70f) }
+    var heightText by rememberSaveable { mutableStateOf(heightCm.toInt().toString()) }
+    var weightText by rememberSaveable { mutableStateOf(weightKg.toInt().toString()) }
     val bmi = calculateBmi(weightKg, heightCm)
     val category = getBmiCategory(bmi)
 
@@ -55,7 +61,17 @@ fun BmiScreen() {
             value = heightCm,
             valueRange = 120f..220f,
             unit = "cm",
-            onValueChange = { heightCm = it }
+            textValue = heightText,
+            onValueChange = {
+                heightCm = it
+                heightText = it.toInt().toString()
+            },
+            onTextChange = { text ->
+                heightText = text
+                text.toFloatOrNull()?.let { number ->
+                    heightCm = number.coerceIn(120f, 220f)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -65,7 +81,17 @@ fun BmiScreen() {
             value = weightKg,
             valueRange = 30f..200f,
             unit = "kg",
-            onValueChange = { weightKg = it }
+            textValue = weightText,
+            onValueChange = {
+                weightKg = it
+                weightText = it.toInt().toString()
+            },
+            onTextChange = { text ->
+                weightText = text
+                text.toFloatOrNull()?.let { number ->
+                    weightKg = number.coerceIn(30f, 200f)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -97,7 +123,9 @@ private fun BmiBar(
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,
     unit: String,
-    onValueChange: (Float) -> Unit
+    textValue: String,
+    onValueChange: (Float) -> Unit,
+    onTextChange: (String) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -126,11 +154,13 @@ private fun BmiBar(
 
             Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = "${value.toInt()} $unit",
-                style = MaterialTheme.typography.titleLarge,
-                color = Color(0xFF10223A),
-                fontWeight = FontWeight.SemiBold
+            OutlinedTextField(
+                value = textValue,
+                onValueChange = onTextChange,
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                suffix = { Text(unit) },
+                modifier = Modifier.width(112.dp)
             )
         }
     }
@@ -159,4 +189,3 @@ fun BmiScreenPreview() {
         BmiScreen()
     }
 }
-

@@ -1,8 +1,6 @@
 package com.example.imcapp.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,13 +8,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +28,9 @@ import com.example.imcapp.ui.theme.IMCAppTheme
 
 @Composable
 fun BmiScreen() {
+    var heightCm by rememberSaveable { mutableFloatStateOf(170f) }
+    var weightKg by rememberSaveable { mutableFloatStateOf(70f) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -44,16 +48,20 @@ fun BmiScreen() {
 
         BmiBar(
             label = "Tu altura",
-            valueText = "170 cm",
-            progress = 0.55f
+            value = heightCm,
+            valueRange = 120f..220f,
+            unit = "cm",
+            onValueChange = { heightCm = it }
         )
 
         Spacer(modifier = Modifier.height(32.dp))
 
         BmiBar(
             label = "Tu peso",
-            valueText = "70 kg",
-            progress = 0.30f
+            value = weightKg,
+            valueRange = 30f..200f,
+            unit = "kg",
+            onValueChange = { weightKg = it }
         )
     }
 }
@@ -61,8 +69,10 @@ fun BmiScreen() {
 @Composable
 private fun BmiBar(
     label: String,
-    valueText: String,
-    progress: Float
+    value: Float,
+    valueRange: ClosedFloatingPointRange<Float>,
+    unit: String,
+    onValueChange: (Float) -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
@@ -77,52 +87,22 @@ private fun BmiBar(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(18.dp),
-                contentAlignment = Alignment.CenterStart
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(18.dp)
-                        .background(
-                            color = Color(0xFFDDE3F6),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                )
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progress)
-                        .height(18.dp)
-                        .background(
-                            color = Color(0xFF536596),
-                            shape = RoundedCornerShape(12.dp)
-                        )
-                )
-
-                Box(
-                    modifier = Modifier
-                        .padding(start = 96.dp)
-                        .width(4.dp)
-                        .height(48.dp)
-                        .background(Color(0xFF536596))
-                )
-
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .size(10.dp)
-                        .background(Color(0xFF536596), CircleShape)
-                )
-            }
+            Slider(
+                value = value,
+                onValueChange = onValueChange,
+                valueRange = valueRange,
+                colors = SliderDefaults.colors(
+                    thumbColor = Color(0xFF536596),
+                    activeTrackColor = Color(0xFF536596),
+                    inactiveTrackColor = Color(0xFFDDE3F6)
+                ),
+                modifier = Modifier.weight(1f)
+            )
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Text(
-                text = valueText,
+                text = "${value.toInt()} $unit",
                 style = MaterialTheme.typography.titleLarge,
                 color = Color(0xFF10223A),
                 fontWeight = FontWeight.SemiBold

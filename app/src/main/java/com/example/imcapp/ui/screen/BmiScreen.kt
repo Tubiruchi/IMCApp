@@ -67,7 +67,7 @@ fun BmiScreen() {
 }
 
 @Composable
-private fun BmiBar(
+private fun BmiBar( 
     label: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,

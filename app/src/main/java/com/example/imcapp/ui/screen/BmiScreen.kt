@@ -24,12 +24,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.imcapp.ui.theme.IMCAppTheme
+import java.util.Locale
 
 @Composable
 fun BmiScreen() {
     var heightCm by rememberSaveable { mutableFloatStateOf(170f) }
     var weightKg by rememberSaveable { mutableFloatStateOf(70f) }
+    val bmi = calculateBmi(weightKg, heightCm)
+    val category = getBmiCategory(bmi)
 
     Column(
         modifier = Modifier
@@ -63,11 +67,32 @@ fun BmiScreen() {
             unit = "kg",
             onValueChange = { weightKg = it }
         )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(
+            text = "Tu IMC es",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = String.format(Locale.US, "%.1f", bmi),
+            color = Color(0xFFE91E3A),
+            fontSize = 56.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Text(
+            text = "Clasificacion: $category",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.SemiBold
+        )
     }
 }
 
 @Composable
-private fun BmiBar( 
+private fun BmiBar(
     label: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,
@@ -108,6 +133,22 @@ private fun BmiBar(
                 fontWeight = FontWeight.SemiBold
             )
         }
+    }
+}
+
+private fun calculateBmi(weightKg: Float, heightCm: Float): Float {
+    val heightMeters = heightCm / 100f
+    return weightKg / (heightMeters * heightMeters)
+}
+
+private fun getBmiCategory(bmi: Float): String {
+    return when {
+        bmi < 18.5f -> "Bajo peso"
+        bmi < 25f -> "Peso normal"
+        bmi < 30f -> "Sobrepeso"
+        bmi < 35f -> "Obesidad grado I"
+        bmi < 40f -> "Obesidad grado II"
+        else -> "Obesidad grado III"
     }
 }
 
